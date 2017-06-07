@@ -1,6 +1,5 @@
 html codeadsfads
 
-adsfas
     <!DOCTYPE html>
     <html>
     <head>
@@ -34,6 +33,3 @@ adsfas
 
     </body>
     </html>
-      
-      adsfas
-      sADDAFDSFADSFASDFsfadfasdfadsf
