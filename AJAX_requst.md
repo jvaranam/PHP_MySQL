@@ -1,4 +1,4 @@
-html codeadsfads
+html code
 
     <!DOCTYPE html>
     <html>
@@ -33,3 +33,12 @@ html codeadsfads
 
     </body>
     </html>
+    
+ PHP Code 
+ 
+    <?php 
+        $fname = $_POST['fname'];
+        $lname = $_POST['lname'];
+
+        echo "First Name : ".$fname. "<br/>Last Name : ".$lname;
+    ?>
