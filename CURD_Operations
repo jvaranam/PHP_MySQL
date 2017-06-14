@@ -1,1 +1,85 @@
 CRUD stands for Create, Read, Update and Delete database records.
+      <?php 
+          class DataBase {
+              private $host = "localhost";
+              private $db_name = "vrtooldemo";
+              private $username = "admin";
+              private $password = "password";
+              private $db=null;
+
+              public function getConnection() {
+                  if(!isset($this->db)){
+                      try{
+                          $conn = new PDO("mysql:host=".$this->host.";dbname=".$this->db_name, $this->username, $this->password);
+                          $conn->exec("set names utf8");
+                          $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                          $this->db = $conn;
+                      }catch(PDOException $e){
+                          die("Failed to connect with MySQL: ".$e->getMessage());
+                      }
+                  }
+              }
+
+              public function createTable($_param){
+                  //$dataObj =  json_decode($_param);
+                  //$dataObj =  json_encode($_param);
+                  //echo "its on decoded";
+                  //print_r($_param[tableName]);
+                  $folderPath = "[url for the folder need to create]".$_param[tableName];
+                  mkdir($folderPath, 0700);
+                  $sql ="CREATE TABLE IF NOT EXISTS `".$_param[tableName]."` (
+                    `id` INT( 11 ) AUTO_INCREMENT PRIMARY KEY,
+                    `userId` VARCHAR( 11 ) DEFAULT NULL, 
+                    `assignee` VARCHAR( 250 ) DEFAULT NULL,
+                    `seatId` VARCHAR( 150 ) DEFAULT NULL, 
+                    `hotspotsArr` VARCHAR ( 150 ) DEFAULT NULL,
+                    `referenceImage` VARCHAR( 150 ) DEFAULT NULL
+                  ) ENGINE=MyISAM DEFAULT CHARSET=latin1;";
+                  try {
+                    $pdoStatement = $this->db->prepare($sql);
+                    $pdoStatement->execute();
+                    $data['status'] = 'OK';
+                    $data['response'] = $folderPath;
+                  } catch(PDOException $e) {
+                    $data['status'] = 'ERROR';
+                    $data['response'] = null;
+                    $data['error'] = $e->getMessage();
+                  }
+                  return json_encode($data);
+              }
+
+              public function insertData($_param){
+                $dataObj =  json_decode($_param);
+                /*$sql = "INSERT INTO $dataObj->tableName (userId, assignee, seatId, hotspotsArr, referenceImage) VALUES ('$dataObj->reporter', '$dataObj->assignee','$dataObj->seatId','$dataObj->hotspotArr','$dataObj->referenceImage')";
+                $this->db->query($sql);*/
+
+                $sql = "INSERT INTO $dataObj->tableName (userId, assignee, seatId, hotspotsArr, referenceImage) VALUES (:userId, :assignee, :seatId, :hotspotArr, :referenceImage)";
+                $pdoStatement = $this->db->prepare($sql);
+
+                $result = $pdoStatement->execute(array(':userId'=>$dataObj->reporter, ':assignee'=>$dataObj->assignee, ':seatId'=>$dataObj->seatId, ':hotspotArr'=>json_encode($dataObj->hotspotArr), ':referenceImage'=>$dataObj->referenceImage));
+                echo "result ".json_encode($dataObj->hotspotArr);
+              }
+
+              public function updateData($id, $_param){
+                $dataObj = json_decode($_param);
+
+                $pdoStatement = $this->db->prepare("UPDATE $dataObj->tableName SET userId='".$dataObj->reporter."', assignee='".$dataObj->assignee."', seatId='".$dataObj->seatId."', hotspotsArr='".json_encode($dataObj->hotspotArr)."', referenceImage='".$dataObj->referenceImage."' where id=".$id);
+                $result = $pdoStatement->execute();
+                echo "updates ".json_encode($dataObj->reporter);
+              }
+              public function fetchData($id, $_param, $where){
+                $dataObj = json_decode($_param);
+                $pdoStatement = $this->db->prepare("SELECT * FROM $dataObj->tableName where $where='".$id."'");
+                $pdoStatement->execute();
+                $result = $pdoStatement->fetchAll();
+                echo json_encode($result);
+              }
+              public function deleteData($id, $_param, $where){
+                echo "\n where ".$where." id ".$id;
+                $dataObj = json_decode($_param);
+                $pdoStatement = $this->db->prepare("DELETE FROM $dataObj->tableName where $where='".$id."'");
+                $pdoStatement->execute();
+                echo "success";
+              }
+          }
+      ?>
